@@ -4,14 +4,10 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { Event } from "../types/Event";
 
 export default function Calendar() {
-  const [weekendsVisible, setWeekendsVisible] = useState(true);
-  const [currentEvents, setCurrentEvents] = useState([]);
-
-  function handleWeekendsToggle() {
-    setWeekendsVisible(!weekendsVisible);
-  }
+  const [currentEvents, setCurrentEvents] = useState<Event[]>([]);
 
   function handleDateSelect(selectInfo: {
     view: { calendar: any };
@@ -36,7 +32,7 @@ export default function Calendar() {
   }
 
   function handleEventClick(clickInfo: {
-    event: { title: any; remove: () => void };
+    event: { title: string; remove: () => void };
   }) {
     if (
       confirm(
@@ -47,17 +43,12 @@ export default function Calendar() {
     }
   }
 
-  function handleEvents(events: React.SetStateAction<never[]>) {
+  function handleEvents(events: React.SetStateAction<Event[]>) {
     setCurrentEvents(events);
   }
 
   return (
     <div className="demo-app">
-      <Sidebar
-        weekendsVisible={weekendsVisible}
-        handleWeekendsToggle={handleWeekendsToggle}
-        currentEvents={currentEvents}
-      />
       <div className="demo-app-main">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -66,17 +57,17 @@ export default function Calendar() {
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
-          initialView="dayGridMonth"
+          initialView="timeGridWeek"
           editable={true}
           selectable={true}
           selectMirror={true}
           dayMaxEvents={true}
-          weekends={weekendsVisible}
-          initialEvents={[]} // alternatively, use the `events` setting to fetch from a feed
+          weekends={true}
+          initialEvents={currentEvents} // alternatively, use the `events` setting to fetch from a feed
           select={handleDateSelect}
           eventContent={renderEventContent} // custom render function
           eventClick={handleEventClick}
-          eventsSet={handleEvents} // called after events are initialized/added/changed/removed
+          eventsSet={() => handleEvents} // called after events are initialized/added/changed/removed
           /* you can update a remote database when these fire:
           eventAdd={function(){}}
           eventChange={function(){}}
@@ -115,57 +106,5 @@ function renderEventContent(eventInfo: {
       <b>{eventInfo.timeText}</b>
       <i>{eventInfo.event.title}</i>
     </>
-  );
-}
-
-function Sidebar({
-  weekendsVisible: boolean,
-  handleWeekendsToggle: boolean,
-  currentEvents: [],
-}) {
-  return (
-    <div className="demo-app-sidebar">
-      <div className="demo-app-sidebar-section">
-        <h2>Instructions</h2>
-        <ul>
-          <li>Select dates and you will be prompted to create a new event</li>
-          <li>Drag, drop, and resize events</li>
-          <li>Click an event to delete it</li>
-        </ul>
-      </div>
-      <div className="demo-app-sidebar-section">
-        <label>
-          <input
-            type="checkbox"
-            checked={weekendsVisible}
-            onChange={handleWeekendsToggle}
-          ></input>
-          toggle weekends
-        </label>
-      </div>
-      <div className="demo-app-sidebar-section">
-        <h2>All Events ({currentEvents.length})</h2>
-        <ul>
-          {currentEvents.map((event) => (
-            <SidebarEvent key={event.id} event={event} />
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function SidebarEvent({ event }) {
-  return (
-    <li key={event.id}>
-      <b>
-        {formatDate(event.start, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })}
-      </b>
-      <i>{event.title}</i>
-    </li>
   );
 }
