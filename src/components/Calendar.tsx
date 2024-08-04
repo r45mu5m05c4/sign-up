@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { SetStateAction, useState } from "react";
 import { formatDate } from "@fullcalendar/core";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { Event } from "../types/Event";
+import { useUser } from "../contexts/UserContext";
 
-export default function Calendar() {
+interface CalendarProps {
+  setCurrentEvent: React.Dispatch<React.SetStateAction<Event>>;
+}
+
+export default function Calendar({ setCurrentEvent }: CalendarProps) {
   const [currentEvents, setCurrentEvents] = useState<Event[]>([]);
+  const { user } = useUser();
 
   function handleDateSelect(selectInfo: {
     view: { calendar: any };
@@ -34,13 +40,15 @@ export default function Calendar() {
   function handleEventClick(clickInfo: {
     event: { title: string; remove: () => void };
   }) {
-    if (
+
+    if(){if (
       confirm(
         `Are you sure you want to delete the event '${clickInfo.event.title}'`
       )
     ) {
       clickInfo.event.remove();
-    }
+    }}else{setCurrentEvent(clickInfo.event)}
+
   }
 
   function handleEvents(events: React.SetStateAction<Event[]>) {
@@ -58,7 +66,7 @@ export default function Calendar() {
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
           initialView="timeGridWeek"
-          editable={true}
+          editable={user.role === "admin"}
           selectable={true}
           selectMirror={true}
           dayMaxEvents={true}

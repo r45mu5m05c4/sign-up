@@ -4,11 +4,10 @@ import supabase from "../../supabase/server";
 import { useUser } from "../../contexts/UserContext";
 
 interface LoginProps {
-  popupPosition: number;
   showLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const LoginModal = ({ popupPosition, showLoginModal }: LoginProps) => {
+export const LoginModal = ({ showLoginModal }: LoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +42,7 @@ export const LoginModal = ({ popupPosition, showLoginModal }: LoginProps) => {
   return (
     <>
       <Overlay onClick={() => showLoginModal(false)} />
-      <Modal onClick={(e) => e.stopPropagation()} top={popupPosition}>
+      <Modal onClick={(e) => e.stopPropagation()}>
         {user && user.aud !== "anon" ? (
           <Button onClick={handleLogout}>Log out</Button>
         ) : (
@@ -82,15 +81,16 @@ const Overlay = styled.div`
   z-index: 50;
 `;
 const Button = styled.button``;
-const Modal = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== "top",
-})<{ top: number }>`
+const Modal = styled.div`
   z-index: 100;
   position: absolute;
   display: flex;
   flex-direction: column;
   padding: 24px;
-  top: ${(props) => props.top}px;
+  top: 12.5%;
+  left: 12.5%;
+  height: 75%;
+  width: 75%;
   border-radius: 8px;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
   background-color: #03161b;
