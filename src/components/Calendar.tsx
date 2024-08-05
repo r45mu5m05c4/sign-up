@@ -1,59 +1,86 @@
-import React, { SetStateAction, useState } from "react";
-import { formatDate } from "@fullcalendar/core";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { Event } from "../types/Event";
 import { useUser } from "../contexts/UserContext";
+import { Event, EventWithPlayers } from "../types/types";
+import { fetchEvents, saveEventToDatabase } from "./EventHandlingFunctions";
 
 interface CalendarProps {
-  setCurrentEvent: React.Dispatch<React.SetStateAction<Event>>;
+  setCurrentEvent: React.Dispatch<
+    React.SetStateAction<EventWithPlayers | undefined>
+  >;
 }
 
 export default function Calendar({ setCurrentEvent }: CalendarProps) {
   const [currentEvents, setCurrentEvents] = useState<Event[]>([]);
   const { user } = useUser();
 
-  function handleDateSelect(selectInfo: {
-    view: { calendar: any };
-    startStr: any;
-    endStr: any;
-    allDay: any;
-  }) {
-    let title = prompt("Please enter a new title for your event");
-    let calendarApi = selectInfo.view.calendar;
+  useEffect(() => {
+    const loadEvents = async () => {
+      const events = await fetchEvents();
+      setCurrentEvents(events);
+    };
 
-    calendarApi.unselect(); // clear date selection
+    loadEvents();
+  }, []);
+
+  const handleDateSelect = (selectInfo: any) => {
+    const title = prompt("Please enter a new title for your event");
+    const calendarApi = selectInfo.view.calendar;
+
+    calendarApi.unselect();
 
     if (title) {
-      calendarApi.addEvent({
-        id: 1,
+      const newEvent: Event = {
+        id: crypto.randomUUID(),
         title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
+        start: new Date(selectInfo.startStr),
+        end: new Date(selectInfo.endStr),
         allDay: selectInfo.allDay,
-      });
+        description: "",
+        type: "",
+        price: 0,
+        location: "",
+        contact: "",
+        maxParticipants: 0,
+      };
+
+      calendarApi.addEvent(newEvent);
+      saveEventToDatabase(newEvent, []); // Assuming no players initially
     }
-  }
+  };
 
-  function handleEventClick(clickInfo: {
-    event: { title: string; remove: () => void };
-  }) {
+  const handleEventClick = (clickInfo: any) => {
+    setCurrentEvent(mapEventApiToEvent(clickInfo.event));
+  };
 
-    if(){if (
-      confirm(
-        `Are you sure you want to delete the event '${clickInfo.event.title}'`
-      )
-    ) {
-      clickInfo.event.remove();
-    }}else{setCurrentEvent(clickInfo.event)}
+  const handleEvents = (events: any[]) => {
+    // Only update state if there is a difference to avoid unnecessary re-renders
+    setCurrentEvents((prevEvents) => {
+      const newEvents = events.map(mapEventApiToEvent);
+      if (JSON.stringify(newEvents) !== JSON.stringify(prevEvents)) {
+        return newEvents;
+      }
+      return prevEvents;
+    });
+  };
 
-  }
-
-  function handleEvents(events: React.SetStateAction<Event[]>) {
-    setCurrentEvents(events);
-  }
+  const mapEventApiToEvent = (eventApi: any): EventWithPlayers => ({
+    id: eventApi.id,
+    start: eventApi.start,
+    end: eventApi.end,
+    title: eventApi.title,
+    description: eventApi.extendedProps.description || "",
+    type: eventApi.extendedProps.type || "",
+    price: eventApi.extendedProps.price || 0,
+    location: eventApi.extendedProps.location || "",
+    contact: eventApi.extendedProps.contact || "",
+    allDay: eventApi.allDay,
+    maxParticipants: eventApi.maxParticipants,
+    players: eventApi.players,
+  });
 
   return (
     <div className="demo-app">
@@ -66,53 +93,31 @@ export default function Calendar({ setCurrentEvent }: CalendarProps) {
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
           initialView="timeGridWeek"
-          editable={user.role === "admin"}
+          editable={user?.admin}
           selectable={true}
           selectMirror={true}
           dayMaxEvents={true}
           weekends={true}
-          initialEvents={currentEvents} // alternatively, use the `events` setting to fetch from a feed
+          events={currentEvents}
           select={handleDateSelect}
-          eventContent={renderEventContent} // custom render function
+          eventContent={renderEventContent}
           eventClick={handleEventClick}
-          eventsSet={() => handleEvents} // called after events are initialized/added/changed/removed
-          /* you can update a remote database when these fire:
-          eventAdd={function(){}}
-          eventChange={function(){}}
-          eventRemove={function(){}}
-          */
+          eventsSet={handleEvents}
         />
       </div>
     </div>
   );
 }
 
-function renderEventContent(eventInfo: {
-  timeText:
-    | string
-    | number
-    | boolean
-    | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-    | Iterable<React.ReactNode>
-    | React.ReactPortal
-    | null
-    | undefined;
-  event: {
-    title:
-      | string
-      | number
-      | boolean
-      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-      | Iterable<React.ReactNode>
-      | React.ReactPortal
-      | null
-      | undefined;
-  };
-}) {
+function renderEventContent(eventInfo: any) {
   return (
     <>
       <b>{eventInfo.timeText}</b>
       <i>{eventInfo.event.title}</i>
     </>
   );
+}
+
+function deleteEventFromDatabase(id: any) {
+  throw new Error("Function not implemented.");
 }

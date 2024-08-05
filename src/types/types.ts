@@ -9,11 +9,25 @@ export interface Event {
   location: string;
   contact: string;
   allDay: boolean;
-  players: Player[];
+  maxParticipants: number;
 }
 export interface Player {
   id: string;
   name: string;
   position: string;
   team: string;
+}
+export interface EventWithPlayers extends Event {
+  players: Player[];
+}
+export interface EventPlayerRel {
+  event_id: string;
+  player_id: string;
+}
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  premium: boolean;
+  admin: boolean;
 }
