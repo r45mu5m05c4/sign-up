@@ -4,23 +4,54 @@ import { useUser } from "../../contexts/UserContext";
 
 interface SignUpProps {
   showSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
+  eventTitle: string;
+  amount: number;
 }
 
-const SignUpForm = ({ showSignUpModal }: SignUpProps) => {
+const SignUpForm = ({ showSignUpModal, eventTitle, amount }: SignUpProps) => {
   const [position, setPosition] = useState("");
   const [team, setTeam] = useState("");
   const { user } = useUser();
-
+  console.log(supabase);
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    const name = user?.name;
-    const email = user?.email;
-    const response = await supabase.functions.invoke("initiate_payment", {
-      body: JSON.stringify({ name, email }),
-    });
 
-    const data = response.data;
-    window.location.href = data.paymentUrl;
+    const phoneNumber = user?.phoneNumber;
+
+    if (phoneNumber) {
+      try {
+        const response = await fetch(
+          "https://zqnoqrullziicwrunhwx.supabase.co/functions/initiate_payment",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Phone-Number": phoneNumber.toString(),
+              "X-Event-Title": eventTitle,
+              "X-Amount": amount.toString(),
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error:", errorData.error || "Unknown error occurred");
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.paymentUrl) {
+          window.location.href = data.paymentUrl;
+        } else {
+          console.error("Error: No payment URL returned.");
+        }
+      } catch (error) {
+        console.error("Unexpected Error:", error);
+      }
+    } else {
+      console.error("Phone number is missing.");
+    }
   };
 
   return (
