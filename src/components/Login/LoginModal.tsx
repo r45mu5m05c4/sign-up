@@ -5,6 +5,7 @@ import { useUser } from "../../contexts/UserContext";
 
 export const LoginModal = () => {
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export const LoginModal = () => {
               name: "",
               premium: false,
               admin: false,
+              phoneNumber: parseInt(phoneNumber),
             })
             .single();
 
@@ -48,6 +50,7 @@ export const LoginModal = () => {
             name: "",
             premium: false,
             admin: false,
+            phoneNumber: parseInt(phoneNumber),
           };
           setUser(newlyRegisteredUser);
         }
@@ -83,7 +86,12 @@ export const LoginModal = () => {
     logout();
     setUser(null);
   };
-
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only digits
+    const numericValue = value.replace(/\D/g, "");
+    setPhoneNumber(numericValue);
+  };
   return (
     <>
       {user ? (
@@ -101,13 +109,27 @@ export const LoginModal = () => {
                 placeholder="E-mail"
               />
               {isRegistering && (
-                <Input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="First and last name"
-                />
+                <>
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="First and last name"
+                  />
+                  <Input
+                    type="text"
+                    value={phoneNumber}
+                    onChange={handlePhoneNumberChange}
+                    required
+                    placeholder="Phone number"
+                    pattern="\d*"
+                  />
+                  <p>
+                    With country code without special characters and initial
+                    zero(s). e.g. 46703123123
+                  </p>
+                </>
               )}
               <Input
                 type="password"

@@ -1,0 +1,97 @@
+/* FullCalendar styles */
+.fc-theme-standard {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.fc-theme-standard .fc-toolbar {
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #444;
+}
+
+.fc-theme-standard .fc-button {
+  background-color: #333;
+  border: 1px solid #444;
+  color: #15ba83; /* Green text for buttons */
+}
+
+.fc-theme-standard .fc-button:hover {
+  background-color: #444;
+}
+
+.fc-theme-standard .fc-button-primary {
+  background-color: #15ba83;
+  border: 1px solid #15ba83;
+  color: #121212;
+}
+
+.fc-theme-standard .fc-button-primary:hover {
+  background-color: #00cc00;
+  border-color: #00cc00;
+}
+
+.fc-theme-standard .fc-daygrid-day {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+}
+
+.fc-theme-standard .fc-event {
+  background-color: #15ba83;
+  border: 1px solid #15ba83;
+  color: #121212;
+}
+
+.fc-theme-standard .fc-event:hover {
+  background-color: #00cc00;
+  border-color: #00cc00;
+}
+
+/* Time slots */
+.fc-timegrid-slot {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+}
+
+.fc-timegrid-axis {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #ffffff;
+}
+
+.fc-timegrid-slot-label {
+  color: #15ba83;
+}
+
+/* Today's highlight */
+.fc-day-today {
+  background-color: #2a2a2a;
+}
+
+/* Event titles */
+.fc-event-title,
+.fc-event-time {
+  color: #121212;
+}
+.fc-col-header-cell-cushion {
+  color: #15ba83;
+}
+.fc-daygrid-day-number {
+  color: #15ba83;
+}
+.fc .fc-scroller {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+.fc .fc-scroller::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
+.fc .fc-toolbar-title {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}

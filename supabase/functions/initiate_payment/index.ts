@@ -12,8 +12,9 @@ router.post("/", async (context) => {
 
         const paymentRequest = {
             payeePaymentReference: eventTitle,
-            callbackUrl:
-                "https://zqnoqrullziicwrunhwx.supabase.co/rest/v1/rpc/payment_callback",
+            callbackUrl: `{${
+                Deno.env.get("VITE_SUPABASE_URL")
+            }}/rest/v1/rpc/payment_callback`,
             payerAlias: phoneNumber,
             payeeAlias: Deno.env.get("PAYEE_ALIAS"),
             amount: amount,
@@ -37,7 +38,7 @@ router.post("/", async (context) => {
         const data = await response.json();
         context.response.body = { paymentUrl: data.paymentUrl };
     } catch (error) {
-        context.response.status = 500; // Internal Server Error
+        context.response.status = 500;
         context.response.body = {
             error: "Payment initiation failed",
             details: error.message,

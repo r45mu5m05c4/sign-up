@@ -3,6 +3,7 @@ import { EventWithPlayers, Player } from "../../types/types";
 import SignUpForm from "./SignUpForm";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
+import { useUser } from "../../contexts/UserContext";
 
 interface EventDisplayProps {
   event: EventWithPlayers;
@@ -11,11 +12,12 @@ const EventDisplay = ({ event }: EventDisplayProps) => {
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [whiteTeam, setWhiteTeam] = useState<Player[]>();
   const [blackTeam, setBlackTeam] = useState<Player[]>();
-
+  const { user } = useUser();
+  console.log("Eventdisplay", event);
   useEffect(() => {
     const setPlayersInTeams = () => {
-      let whiteTeamPlayers: Player[] = [];
-      let blackTeamPlayers: Player[] = [];
+      const whiteTeamPlayers: Player[] = [];
+      const blackTeamPlayers: Player[] = [];
       event.players?.map((p: Player) => {
         if (p.team === "white") whiteTeamPlayers.push(p);
         if (p.team === "black") blackTeamPlayers.push(p);
@@ -24,7 +26,16 @@ const EventDisplay = ({ event }: EventDisplayProps) => {
       setBlackTeam(blackTeamPlayers);
     };
     setPlayersInTeams();
-  }, []);
+  }, [event]);
+
+  const isPlayerSignedUp = () => {
+    if (user?.id) {
+      const player = event.players.find((p: Player) => p.id === user.id);
+      if (player) return true;
+      return false;
+    }
+    return false;
+  };
 
   return (
     <Container>
@@ -66,8 +77,20 @@ const EventDisplay = ({ event }: EventDisplayProps) => {
           })}
         </BlackTeamContainer>
       </Teams>
-      <Button onClick={() => setShowSignUpForm(true)}>Sign up</Button>
-      {showSignUpForm && <SignUpForm showSignUpModal={setShowSignUpForm} />}
+      {!showSignUpForm && (
+        <Button onClick={() => setShowSignUpForm(true)}>
+          {isPlayerSignedUp() ? "Update" : "Sign up"}
+        </Button>
+      )}
+      {showSignUpForm && (
+        <SignUpForm
+          showSignUpModal={setShowSignUpForm}
+          eventId={event.id}
+          eventTitle={event.title}
+          amount={event.price}
+          playerIsSignedUp={isPlayerSignedUp()}
+        />
+      )}
     </Container>
   );
 };

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Calendar from "./Calendar";
+import Calendar from "./Calendar/Calendar";
 import { useState } from "react";
 import { EventWithPlayers } from "../types/types";
 import EventDisplay from "./Event/EventDisplay";

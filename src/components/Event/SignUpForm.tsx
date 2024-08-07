@@ -1,21 +1,34 @@
 import React, { useState } from "react";
 import supabase from "../../supabase/server";
 import { useUser } from "../../contexts/UserContext";
+import { addPlayerToEvent } from "../Calendar/EventHandlingFunctions";
+import { Player } from "../../types/types";
 
 interface SignUpProps {
   showSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
+  eventId: string;
   eventTitle: string;
   amount: number;
+  playerIsSignedUp: boolean;
 }
 
-const SignUpForm = ({ showSignUpModal, eventTitle, amount }: SignUpProps) => {
+const SignUpForm = ({
+  showSignUpModal,
+  eventId,
+  eventTitle,
+  amount,
+  playerIsSignedUp,
+}: SignUpProps) => {
   const [position, setPosition] = useState("");
   const [team, setTeam] = useState("");
+  const [message, setMessage] = useState<string>("");
   const { user } = useUser();
   console.log(supabase);
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-
+    position !== "" && team !== ""
+      ? noPaymentSignUp()
+      : setMessage("Pick team and position");
     const phoneNumber = user?.phoneNumber;
 
     if (phoneNumber) {
@@ -54,15 +67,35 @@ const SignUpForm = ({ showSignUpModal, eventTitle, amount }: SignUpProps) => {
     }
   };
 
+  const noPaymentSignUp = async () => {
+    if (user) {
+      const newPlayer: Player = {
+        id: user.id,
+        name: user.name,
+        position: position,
+        team: team,
+      };
+
+      try {
+        await addPlayerToEvent(eventId, newPlayer);
+        console.log("Player successfully added to the event.");
+      } catch (error) {
+        console.error("Failed to add player to event:", error);
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <label>{user?.name}</label>
       <label>{user?.email}</label>
+      {message && <label>{message}</label>}
       <select
         value={position}
         onChange={(e) => setPosition(e.target.value)}
         required
       >
+        <option value={""}>Select position</option>
         <option key={1} value="LW">
           Left Wing
         </option>
@@ -83,6 +116,7 @@ const SignUpForm = ({ showSignUpModal, eventTitle, amount }: SignUpProps) => {
         </option>
       </select>
       <select value={team} onChange={(e) => setTeam(e.target.value)} required>
+        <option value={""}>Select team</option>
         <option key={1} value="white">
           White
         </option>
@@ -90,7 +124,7 @@ const SignUpForm = ({ showSignUpModal, eventTitle, amount }: SignUpProps) => {
           Black
         </option>
       </select>
-      <button type="submit">Sign Up and Pay</button>
+      <button type="submit">{playerIsSignedUp ? "Update" : "Sign Up"}</button>
       <button onClick={() => showSignUpModal(false)}>Cancel</button>
     </form>
   );

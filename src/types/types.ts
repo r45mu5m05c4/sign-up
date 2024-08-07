@@ -23,6 +23,7 @@ export interface EventWithPlayers extends Event {
 export interface EventPlayerRel {
   event_id: string;
   player_id: string;
+  payment_confirmation: boolean;
 }
 export interface User {
   id: string;

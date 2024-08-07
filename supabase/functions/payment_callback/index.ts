@@ -3,24 +3,24 @@ import { Application, Router } from "https://deno.land/x/oak@v10.5.1/mod.ts";
 const app = new Application();
 const router = new Router();
 
-const SUPABASE_URL = "https://zqnoqrullziicwrunhwx.supabase.co";
-const SUPABASE_KEY = "YOUR_SUPABASE_SERVICE_ROLE_KEY";
-
 // Helper function to update the payment confirmation
 async function updatePaymentConfirmation(eventId: string, playerId: string) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/event_player`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "apikey": SUPABASE_KEY,
+    const response = await fetch(
+        `${Deno.env.get("SUPABASE_URL")}/rest/v1/event_player`,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Deno.env.get("SUPABASE_KEY")}`,
+                "apikey": `${Deno.env.get("SUPABASE_KEY")}`,
+            },
+            body: JSON.stringify({
+                event_id: eventId,
+                player_id: playerId,
+                payment_confirmation: true,
+            }),
         },
-        body: JSON.stringify({
-            payment_confirmation: true,
-            event_id: eventId,
-            player_id: playerId,
-        }),
-    });
+    );
 
     if (!response.ok) {
         throw new Error(
